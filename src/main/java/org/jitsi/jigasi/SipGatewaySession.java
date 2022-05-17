@@ -23,6 +23,8 @@ import net.java.sip.communicator.service.protocol.event.*;
 import net.java.sip.communicator.service.protocol.media.CallPeerMediaHandler;
 import net.java.sip.communicator.service.protocol.media.MediaAwareCallPeer;
 import net.java.sip.communicator.util.Logger;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -345,8 +347,8 @@ public class SipGatewaySession
                 = sipProvider.getOperationSet(
                 OperationSetJitsiMeetTools.class);
 
-        final String roomUrlPath = getRoomUrlPath();
-        System.out.println("****************************** " + roomUrlPath);
+        final Pair<String, String> result = getRoomUrlPath();
+        System.out.println("1 ****************************** " + result.getLeft() + "|" + result.getRight());
 
         // check for custom header name for room pass header
         roomPassHeaderName = sipProvider.getAccountID()
@@ -566,8 +568,8 @@ public class SipGatewaySession
                 public void outgoingCallCreated(CallEvent callEvent) {
                     String roomName = getCallContext().getRoomJid().toString();
                     if (roomName != null) {
-                        final String roomUrlPath = getRoomUrlPath();
-                        System.out.println("****************************** " + roomUrlPath);
+                        final Pair<String, String> result = getRoomUrlPath();
+                        System.out.println("2 ****************************** " + result.getLeft() + "|" + result.getRight());
 
                         Call call = callEvent.getSourceCall();
                         AtomicInteger headerCount = new AtomicInteger(0);
@@ -636,7 +638,7 @@ public class SipGatewaySession
         }
     }
 
-    private String getRoomUrlPath() {
+    private Pair<String, String> getRoomUrlPath() {
         final HttpPost method = new HttpPost("http://voice-gateway/rooms");
         method.addHeader("auth-token", "6dnz2kK7fasdsadSVSXPn9QQekhgFVF");
 
@@ -656,7 +658,9 @@ public class SipGatewaySession
             }
 
             final org.json.JSONObject jsonResponse = new org.json.JSONObject(stringBuilder.toString());
-            return jsonResponse.getString("response");
+
+            return ImmutablePair.of(jsonResponse.getString("url"), jsonResponse.getString("room"));
+
         } catch (final Exception e) {
             e.printStackTrace();
             return null;

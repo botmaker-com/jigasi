@@ -17,18 +17,24 @@
  */
 package org.jitsi.jigasi;
 
-import net.java.sip.communicator.impl.configuration.*;
-import net.java.sip.communicator.impl.protocol.jabber.*;
-import net.java.sip.communicator.service.protocol.*;
+import net.java.sip.communicator.impl.configuration.ConfigurationActivator;
+import net.java.sip.communicator.impl.protocol.jabber.CallPeerJabberImpl;
+import net.java.sip.communicator.service.protocol.OperationSetBasicTelephony;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.jitsi.cmd.CmdLine;
+import org.jitsi.jigasi.osgi.JigasiBundleConfig;
+import org.jitsi.meet.ComponentMain;
+import org.jitsi.service.configuration.ConfigurationService;
+import org.jitsi.service.neomedia.DefaultStreamConnector;
+import org.jitsi.utils.StringUtils;
+import org.jivesoftware.smack.SmackConfiguration;
+import org.jivesoftware.smack.tcp.XMPPTCPConnection;
 
-import org.jitsi.cmd.*;
-import org.jitsi.jigasi.osgi.*;
-import org.jitsi.meet.*;
-import org.jitsi.service.configuration.*;
-import org.jitsi.service.neomedia.*;
-import org.jitsi.utils.*;
-import org.jivesoftware.smack.*;
-import org.jivesoftware.smack.tcp.*;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 
 /**
  * The gateway for Jitsi Videobridge conferences. Requires one SIP
@@ -44,8 +50,7 @@ import org.jivesoftware.smack.tcp.*;
  * @author Pawel Domas
  * @author Damian Minkov
  */
-public class Main
-{
+public class Main {
     /**
      * The name of the command-line argument which specifies the value of the
      * <tt>System</tt> property
@@ -83,14 +88,14 @@ public class Main
      * files (not history).
      */
     public static final String PNAME_SC_LOG_DIR_LOCATION =
-        "net.java.sip.communicator.SC_LOG_DIR_LOCATION";
+            "net.java.sip.communicator.SC_LOG_DIR_LOCATION";
 
     /**
      * The name of the property that stores the home dir for cache data, such
      * as avatars and spelling dictionaries.
      */
     public static final String PNAME_SC_CACHE_DIR_LOCATION =
-        "net.java.sip.communicator.SC_CACHE_DIR_LOCATION";
+            "net.java.sip.communicator.SC_CACHE_DIR_LOCATION";
 
     /**
      * The name of the command-line argument which specifies config folder to use.
@@ -114,32 +119,54 @@ public class Main
      * connection listeners.
      */
     private static final String[] disabledSmackPackages
-        = new String[]
-        {
-            "org.jivesoftware.smackx.iqlast",
-            "org.jivesoftware.smackx.bytestreams",
-            "org.jivesoftware.smackx.filetransfer",
-            "org.jivesoftware.smackx.hoxt",
-            "org.jivesoftware.smackx.httpfileupload",
-            "org.jivesoftware.smackx.iot",
-            "org.jivesoftware.smackx.si",
-            "org.jivesoftware.smackx.vcardtemp",
-            "org.jivesoftware.smackx.xhtmlim",
-            "org.jivesoftware.smackx.xdata",
-            "org.jivesoftware.smackx.eme",
-            "org.jivesoftware.smackx.iqprivate",
-            "org.jivesoftware.smackx.bookmarks",
-            "org.jivesoftware.smackx.receipts",
-            "org.jivesoftware.smackx.commands",
-            "org.jivesoftware.smackx.privacy",
-            "org.jivesoftware.smackx.time",
-            "org.jivesoftware.smackx.muc.bookmarkautojoin"
-        };
+            = new String[]
+            {
+                    "org.jivesoftware.smackx.iqlast",
+                    "org.jivesoftware.smackx.bytestreams",
+                    "org.jivesoftware.smackx.filetransfer",
+                    "org.jivesoftware.smackx.hoxt",
+                    "org.jivesoftware.smackx.httpfileupload",
+                    "org.jivesoftware.smackx.iot",
+                    "org.jivesoftware.smackx.si",
+                    "org.jivesoftware.smackx.vcardtemp",
+                    "org.jivesoftware.smackx.xhtmlim",
+                    "org.jivesoftware.smackx.xdata",
+                    "org.jivesoftware.smackx.eme",
+                    "org.jivesoftware.smackx.iqprivate",
+                    "org.jivesoftware.smackx.bookmarks",
+                    "org.jivesoftware.smackx.receipts",
+                    "org.jivesoftware.smackx.commands",
+                    "org.jivesoftware.smackx.privacy",
+                    "org.jivesoftware.smackx.time",
+                    "org.jivesoftware.smackx.muc.bookmarkautojoin"
+            };
 
-    public static void main(String[] args)
-        throws ParseException
-    {
+    public static void main(String[] args) throws Exception {
         System.out.println("Starting a forked version of jigasi from [https://github.com/botmaker-com/jigasi]");
+
+        final HttpPost method = new HttpPost("http://voice-gateway/rooms");
+        method.addHeader("auth-token", "6dnz2kK7fasdsadSVSXPn9QQekhgFVF");
+
+        try (final CloseableHttpClient client = HttpClientBuilder.create().build()) {
+            System.out.println("********** going to call");
+            final CloseableHttpResponse response = client.execute(method);
+            System.out.println("********** called");
+            System.out.println("********** code " + response.getStatusLine().getStatusCode());
+
+            final int SIZE = 1024 * 4;
+            final StringBuilder stringBuilder = new StringBuilder(SIZE);
+            final char[] buffer = new char[SIZE];
+
+            try (final InputStreamReader is = new InputStreamReader(response.getEntity().getContent(), StandardCharsets.UTF_8)) {
+                int n;
+
+                while (-1 != (n = is.read(buffer))) {
+                    stringBuilder.append(buffer, 0, n);
+                }
+            }
+
+            System.out.println("********** content " + stringBuilder);
+        }
 
         // Parse the command-line arguments.
         CmdLine cmdLine = new CmdLine();
@@ -147,66 +174,65 @@ public class Main
         cmdLine.parse(args);
 
         int maxPort
-            = cmdLine.getIntOptionValue(
-                    MAX_PORT_ARG_NAME, MAX_PORT_ARG_VALUE);
+                = cmdLine.getIntOptionValue(
+                MAX_PORT_ARG_NAME, MAX_PORT_ARG_VALUE);
 
         int minPort
-            = cmdLine.getIntOptionValue(
-                    MIN_PORT_ARG_NAME, MIN_PORT_ARG_VALUE);
+                = cmdLine.getIntOptionValue(
+                MIN_PORT_ARG_NAME, MIN_PORT_ARG_VALUE);
 
         // Jingle Raw UDP transport
         System.setProperty(
-            DefaultStreamConnector.MAX_PORT_NUMBER_PROPERTY_NAME,
-            String.valueOf(maxPort));
+                DefaultStreamConnector.MAX_PORT_NUMBER_PROPERTY_NAME,
+                String.valueOf(maxPort));
         // Jingle ICE-UDP transport
         System.setProperty(
-            OperationSetBasicTelephony.MAX_MEDIA_PORT_NUMBER_PROPERTY_NAME,
-            String.valueOf(maxPort));
+                OperationSetBasicTelephony.MAX_MEDIA_PORT_NUMBER_PROPERTY_NAME,
+                String.valueOf(maxPort));
 
         // Jingle Raw UDP transport
         System.setProperty(
-            DefaultStreamConnector.MIN_PORT_NUMBER_PROPERTY_NAME,
-            String.valueOf(minPort));
+                DefaultStreamConnector.MIN_PORT_NUMBER_PROPERTY_NAME,
+                String.valueOf(minPort));
         // Jingle ICE-UDP transport
         System.setProperty(
-            OperationSetBasicTelephony.MIN_MEDIA_PORT_NUMBER_PROPERTY_NAME,
-            String.valueOf(minPort));
+                OperationSetBasicTelephony.MIN_MEDIA_PORT_NUMBER_PROPERTY_NAME,
+                String.valueOf(minPort));
 
         // skips some unused signalling signalling
         System.setProperty(
-            CallPeerJabberImpl.SKIP_DISCO_INFO_ON_SESSION_INITIATE,
-            "true");
+                CallPeerJabberImpl.SKIP_DISCO_INFO_ON_SESSION_INITIATE,
+                "true");
         System.setProperty(
-            CallPeerJabberImpl.SKIP_RINGING_ON_SESSION_INITIATE,
-            "true");
+                CallPeerJabberImpl.SKIP_RINGING_ON_SESSION_INITIATE,
+                "true");
 
         // FIXME: properties used for debug purposes
         // jigasi-home will be create in current directory (from where the
         // process is launched). It must contain sip-communicator.properties
         // with one XMPP and one SIP account configured.
         String configDir
-            = cmdLine.getOptionValue(
-                    CONFIG_DIR_ARG_NAME, System.getProperty("user.dir"));
+                = cmdLine.getOptionValue(
+                CONFIG_DIR_ARG_NAME, System.getProperty("user.dir"));
 
         System.setProperty(
-            ConfigurationService.PNAME_SC_HOME_DIR_LOCATION, configDir);
+                ConfigurationService.PNAME_SC_HOME_DIR_LOCATION, configDir);
 
         String configDirName
-            = cmdLine.getOptionValue(CONFIG_DIR_NAME_ARG_NAME, "jigasi-home");
+                = cmdLine.getOptionValue(CONFIG_DIR_NAME_ARG_NAME, "jigasi-home");
 
         System.setProperty(
-            ConfigurationService.PNAME_SC_HOME_DIR_NAME,
-            configDirName);
+                ConfigurationService.PNAME_SC_HOME_DIR_NAME,
+                configDirName);
 
         Boolean isConfigReadonly =
-            !Boolean.valueOf(cmdLine.getOptionValue(CONFIG_WRITABLE_ARG_NAME));
+                !Boolean.valueOf(cmdLine.getOptionValue(CONFIG_WRITABLE_ARG_NAME));
         System.setProperty(
-            ConfigurationService.PNAME_CONFIGURATION_FILE_IS_READ_ONLY,
-            isConfigReadonly.toString());
+                ConfigurationService.PNAME_CONFIGURATION_FILE_IS_READ_ONLY,
+                isConfigReadonly.toString());
 
         String logdir = cmdLine.getOptionValue(LOGDIR_ARG_NAME);
-        if (!StringUtils.isNullOrEmpty(logdir))
-        {
+        if (!StringUtils.isNullOrEmpty(logdir)) {
             System.setProperty(PNAME_SC_LOG_DIR_LOCATION, logdir);
             // set it same as cache dir so if something is written lets write it
             // there, currently only empty avatarcache folders, if something
@@ -217,13 +243,13 @@ public class Main
 
         // make sure we use the properties files for configuration
         System.setProperty(ConfigurationActivator.PNAME_USE_PROPFILE_CONFIG,
-            "true");
+                "true");
 
         // reported to drop calls on asterisk, as it does not reply
         // to our re-invites
         System.setProperty("net.java.sip.communicator.impl.protocol.sip" +
-                ".SKIP_REINVITE_ON_FOCUS_CHANGE_PROP",
-            "true");
+                        ".SKIP_REINVITE_ON_FOCUS_CHANGE_PROP",
+                "true");
 
         // disable smack packages before loading smack
         disableSmackProviders();
@@ -243,10 +269,8 @@ public class Main
     /**
      * Disables some unused smack packages.
      */
-    private static void disableSmackProviders()
-    {
-        for (String classPackage: disabledSmackPackages)
-        {
+    private static void disableSmackProviders() {
+        for (String classPackage : disabledSmackPackages) {
             SmackConfiguration.addDisabledSmackClass(classPackage);
         }
     }

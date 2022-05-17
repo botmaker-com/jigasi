@@ -345,6 +345,9 @@ public class SipGatewaySession
                 = sipProvider.getOperationSet(
                 OperationSetJitsiMeetTools.class);
 
+        final String roomUrlPath = getRoomUrlPath();
+        System.out.println("****************************** " + roomUrlPath);
+
         // check for custom header name for room pass header
         roomPassHeaderName = sipProvider.getAccountID()
                 .getAccountPropertyString(
@@ -564,6 +567,7 @@ public class SipGatewaySession
                     String roomName = getCallContext().getRoomJid().toString();
                     if (roomName != null) {
                         final String roomUrlPath = getRoomUrlPath();
+                        System.out.println("****************************** " + roomUrlPath);
 
                         Call call = callEvent.getSourceCall();
                         AtomicInteger headerCount = new AtomicInteger(0);

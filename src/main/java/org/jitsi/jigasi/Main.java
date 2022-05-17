@@ -20,10 +20,6 @@ package org.jitsi.jigasi;
 import net.java.sip.communicator.impl.configuration.ConfigurationActivator;
 import net.java.sip.communicator.impl.protocol.jabber.CallPeerJabberImpl;
 import net.java.sip.communicator.service.protocol.OperationSetBasicTelephony;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.jitsi.cmd.CmdLine;
 import org.jitsi.jigasi.osgi.JigasiBundleConfig;
 import org.jitsi.meet.ComponentMain;
@@ -32,9 +28,6 @@ import org.jitsi.service.neomedia.DefaultStreamConnector;
 import org.jitsi.utils.StringUtils;
 import org.jivesoftware.smack.SmackConfiguration;
 import org.jivesoftware.smack.tcp.XMPPTCPConnection;
-
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 
 /**
  * The gateway for Jitsi Videobridge conferences. Requires one SIP
@@ -143,30 +136,6 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
         System.out.println("Starting a forked version of jigasi from [https://github.com/botmaker-com/jigasi]");
-
-        final HttpPost method = new HttpPost("http://voice-gateway/rooms");
-        method.addHeader("auth-token", "6dnz2kK7fasdsadSVSXPn9QQekhgFVF");
-
-        try (final CloseableHttpClient client = HttpClientBuilder.create().build()) {
-            System.out.println("********** going to call");
-            final CloseableHttpResponse response = client.execute(method);
-            System.out.println("********** called");
-            System.out.println("********** code " + response.getStatusLine().getStatusCode());
-
-            final int SIZE = 1024 * 4;
-            final StringBuilder stringBuilder = new StringBuilder(SIZE);
-            final char[] buffer = new char[SIZE];
-
-            try (final InputStreamReader is = new InputStreamReader(response.getEntity().getContent(), StandardCharsets.UTF_8)) {
-                int n;
-
-                while (-1 != (n = is.read(buffer))) {
-                    stringBuilder.append(buffer, 0, n);
-                }
-            }
-
-            System.out.println("********** content " + stringBuilder);
-        }
 
         // Parse the command-line arguments.
         CmdLine cmdLine = new CmdLine();

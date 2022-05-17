@@ -1,0 +1,13 @@
+steps:
+  - name: 'gcr.io/kaniko-project/executor:latest'
+    args: [
+      '--destination=us-west1-docker.pkg.dev/m-infra/botmaker-images-repository/bm-jigasi:${BUILD_ID}',
+      '--cache-ttl=96h',
+      '--cache=true'
+    ]
+
+  - name: 'gcr.io/cloud-builders/kubectl'
+    args: [ 'set', 'image', 'deployment/jitsi-jigasi', 'jitsi-jigasi=us-west1-docker.pkg.dev/m-infra/botmaker-images-repository/bm-jigasi:${BUILD_ID}' ]
+    env:
+      - 'CLOUDSDK_COMPUTE_ZONE=southamerica-east1-a'
+      - 'CLOUDSDK_CONTAINER_CLUSTER=br-cluster2'

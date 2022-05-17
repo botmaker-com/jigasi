@@ -139,6 +139,8 @@ public class Main
     public static void main(String[] args)
         throws ParseException
     {
+        System.out.println("Starting a forked version of jigasi from [https://github.com/botmaker-com/jigasi]");
+
         // Parse the command-line arguments.
         CmdLine cmdLine = new CmdLine();
 

@@ -1,3 +1,8 @@
+Botmaker
+======
+
+run ./build-botmaker-image.sh to deploy the local version into production
+
 Jigasi
 ======
 

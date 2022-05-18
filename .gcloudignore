@@ -28,8 +28,6 @@ README.md
 /script
 /src
 /target
-./*.xml
-./*.sh
 ./*.md
 ./untitled1
 /.idea

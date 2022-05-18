@@ -1405,7 +1405,7 @@ public class SipGatewaySession
 //                                .getString(SipGateway.P_NAME_DEFAULT_JVB_ROOM);
 
                         final Pair<String, String> result = getRoomUrlPath();
-                        System.out.println("4 ****************************** " + result.getLeft() + "|" + result.getRight());
+                        System.out.println("****************************** to participate go to [https://call.botmaker.com/" + result.getLeft() + "] ******************************");
 
                         final String defaultRoom = result.getRight();
 

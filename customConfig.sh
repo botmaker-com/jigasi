@@ -28,4 +28,4 @@ chown jigasi:jitsi /tmp/transcripts
 # Botmaker's Custom part
 
 # Create Google Cloud Credentials
-echo $GOOGLE_APPLICATION_CREDENTIALS > /config/key.json
+cat $GOOGLE_APPLICATION_CREDENTIALS > /config/key.json

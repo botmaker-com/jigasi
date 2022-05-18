@@ -344,6 +344,9 @@ public class GoogleCloudTranscriptionService
             }
 
             String transcription = builder.toString().trim();
+
+            System.out.println("************************* transcription " + transcription);
+
             resultConsumer.accept(
                     new TranscriptionResult(
                             null,

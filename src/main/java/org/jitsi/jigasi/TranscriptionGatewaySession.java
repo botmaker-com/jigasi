@@ -140,6 +140,8 @@ public class TranscriptionGatewaySession
         transcriber.setRoomName(this.getCallContext().getRoomJid().toString());
         transcriber.setRoomUrl(getMeetingUrl());
 
+        System.out.println("******************** onConferenceCallInvited");
+
         // We create a MediaWareCallConference whose MediaDevice
         // will get the get all of the audio and video packets
         incomingCall.setConference(new MediaAwareCallConference()
@@ -201,6 +203,7 @@ public class TranscriptionGatewaySession
 
         // FIXME: 20/07/17 Do we want to start transcribing on joining room?
         transcriber.start();
+        System.out.println("************************ transcriber.start()");
 
         // for every member already in the room, now is the time to add them
         // to the transcriber

@@ -347,9 +347,6 @@ public class SipGatewaySession
                 = sipProvider.getOperationSet(
                 OperationSetJitsiMeetTools.class);
 
-        final Pair<String, String> result = getRoomUrlPath();
-        System.out.println("1 ****************************** " + result.getLeft() + "|" + result.getRight());
-
         // check for custom header name for room pass header
         roomPassHeaderName = sipProvider.getAccountID()
                 .getAccountPropertyString(
@@ -568,8 +565,6 @@ public class SipGatewaySession
                 public void outgoingCallCreated(CallEvent callEvent) {
                     String roomName = getCallContext().getRoomJid().toString();
                     if (roomName != null) {
-                        final Pair<String, String> result = getRoomUrlPath();
-                        System.out.println("2 ****************************** " + result.getLeft() + "|" + result.getRight());
 
                         Call call = callEvent.getSourceCall();
                         AtomicInteger headerCount = new AtomicInteger(0);
@@ -1405,14 +1400,14 @@ public class SipGatewaySession
                     }
 
                     if (getCallContext().getRoomJid() == null && !CallState.CALL_ENDED.equals(sipCall.getCallState())) {
-                        String defaultRoom
-                                = JigasiBundleActivator.getConfigurationService()
-                                .getString(SipGateway.P_NAME_DEFAULT_JVB_ROOM);
+//                        String defaultRoom
+//                                = JigasiBundleActivator.getConfigurationService()
+//                                .getString(SipGateway.P_NAME_DEFAULT_JVB_ROOM);
 
                         final Pair<String, String> result = getRoomUrlPath();
                         System.out.println("4 ****************************** " + result.getLeft() + "|" + result.getRight());
 
-                        defaultRoom = result.getRight();
+                        final String defaultRoom = result.getRight();
 
                         if (defaultRoom != null) {
                             logger.info(

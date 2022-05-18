@@ -211,6 +211,28 @@
             <version>1.7.30</version>
             <scope>runtime</scope>
         </dependency>
+
+        <!-- ==================================== TEMP CODE START ==================================== -->
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjrt</artifactId>
+            <version>1.9.7</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjweaver</artifactId>
+            <version>1.9.7</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>aspectj-maven-plugin</artifactId>
+            <version>1.14.0</version>
+        </dependency>
+        <!-- ==================================== TEMP CODE END ==================================== -->
+
+
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>

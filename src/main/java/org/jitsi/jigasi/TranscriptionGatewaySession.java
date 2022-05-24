@@ -41,6 +41,7 @@ import java.util.*;
  *
  * @author Nik Vaessen
  */
+@Trace
 public class TranscriptionGatewaySession
     extends AbstractGatewaySession
     implements TranscriptionListener,

@@ -6,11 +6,11 @@ public aspect LoggingAspect {
 
     Object around(): traceAnnotatedClasses() {
         String signature = thisJoinPoint.getSignature().toShortString();
-        System.out.println("Entering " + signature);
+        System.out.println("***** Entering " + signature);
         try {
             return proceed();
         } finally {
-            System.out.println("Exiting " + signature);
+            System.out.println("***** Exiting " + signature);
         }
     }
 }

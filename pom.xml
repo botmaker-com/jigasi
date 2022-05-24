@@ -375,8 +375,8 @@
                 <configuration>
                     <showWeaveInfo>true</showWeaveInfo>
 
-                    <source>10</source>
-                    <target>10</target>
+                    <source>8</source>
+                    <target>8</target>
                 </configuration>
             </plugin>
             <plugin>

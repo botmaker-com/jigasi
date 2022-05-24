@@ -22,6 +22,7 @@ import net.java.sip.communicator.service.protocol.*;
 import net.java.sip.communicator.service.protocol.event.*;
 import net.java.sip.communicator.service.protocol.media.CallPeerMediaHandler;
 import net.java.sip.communicator.service.protocol.media.MediaAwareCallPeer;
+import net.java.sip.communicator.service.protocol.media.MediaHandler;
 import net.java.sip.communicator.util.Logger;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -36,6 +37,7 @@ import org.jitsi.jigasi.stats.Statistics;
 import org.jitsi.jigasi.stats.StatsHandler;
 import org.jitsi.jigasi.util.Util;
 import org.jitsi.service.neomedia.MediaStream;
+import org.jitsi.service.neomedia.format.MediaFormat;
 import org.jitsi.utils.MediaType;
 import org.jitsi.utils.StringUtils;
 import org.jitsi.utils.concurrent.PeriodicRunnable;
@@ -1285,6 +1287,12 @@ public class SipGatewaySession
 
                 logger.info(SipGatewaySession.this.callContext + " SIP call format used: "
                         + Util.getFirstPeerMediaFormat(call));
+
+                final MediaStream mediaStream = SoundNotificationManager.getMediaStream(call);
+                final Map<Byte, MediaFormat> dynamicRTPPayloadTypes = mediaStream.getDynamicRTPPayloadTypes();
+                dynamicRTPPayloadTypes.entrySet().forEach(entry -> {
+                    System.out.println(entry.getValue().getMediaType().toString());
+                });
 
                 Executors.newFixedThreadPool(1)
                         .submit(() -> {

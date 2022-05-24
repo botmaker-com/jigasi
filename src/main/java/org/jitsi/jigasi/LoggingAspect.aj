@@ -1,6 +1,6 @@
 package org.jitsi.jigasi;
 
-public aspect TracingAspect {
+public aspect LoggingAspect {
 
     pointcut traceAnnotatedClasses(): within(@Trace *) && execution(* *(..));
 

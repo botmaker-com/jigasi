@@ -31,6 +31,7 @@ import java.util.*;
  * @author Pawel Domas
  * @author Nik Vaessen
  */
+@Trace
 public abstract class AbstractGatewaySession
     implements OperationSetJitsiMeetTools.JitsiMeetRequestListener,
                DTMFListener

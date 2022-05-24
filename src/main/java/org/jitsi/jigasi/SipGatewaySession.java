@@ -60,6 +60,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author Pawel Domas
  * @author Nik Vaessen
  */
+@Trace
 public class SipGatewaySession
         extends AbstractGatewaySession {
     /**

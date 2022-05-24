@@ -26,6 +26,7 @@ import org.jitsi.service.neomedia.*;
  *
  * @author Damian Minkov
  */
+@Trace
 public class SsrcRewriter
     extends SinglePacketTransformerAdapter
     implements TransformEngine

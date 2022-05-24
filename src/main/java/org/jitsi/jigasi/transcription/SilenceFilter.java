@@ -17,6 +17,7 @@
  */
 package org.jitsi.jigasi.transcription;
 
+import org.jitsi.jigasi.Trace;
 import org.jitsi.webrtcvadwrapper.*;
 import org.jitsi.webrtcvadwrapper.audio.*;
 
@@ -26,6 +27,7 @@ import org.jitsi.webrtcvadwrapper.audio.*;
  *
  * @author Nik Vaessen
  */
+@Trace
 public class SilenceFilter
 {
     /**

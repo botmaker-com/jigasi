@@ -46,6 +46,7 @@ import java.util.*;
  * @author Pawel Domas
  * @author Nik Vaessen
  */
+@Trace
 public class JigasiBundleActivator
     implements BundleActivator,
                ServiceListener

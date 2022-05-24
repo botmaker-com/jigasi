@@ -39,6 +39,7 @@ import java.util.*;
  *
  * @author Nik Vaessen
  */
+@Trace
 public abstract class AbstractTranscriptPublisher<T>
     implements TranscriptPublisher,
                TranscriptionResultPublisher

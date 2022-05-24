@@ -17,6 +17,8 @@
  */
 package org.jitsi.jigasi.transcription;
 
+import org.jitsi.jigasi.Trace;
+
 import java.util.*;
 
 /**
@@ -24,6 +26,7 @@ import java.util.*;
  *
  * @author Praveen Kumar Gupta
  */
+@Trace
 public class TranslationManager
     implements TranscriptionListener
 {

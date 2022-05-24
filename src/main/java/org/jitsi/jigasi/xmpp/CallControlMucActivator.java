@@ -48,6 +48,7 @@ import java.util.stream.*;
  * @author Damian Minkov
  * @author Nik Vaessen
  */
+@Trace
 public class CallControlMucActivator
     implements BundleActivator,
                ServiceListener,

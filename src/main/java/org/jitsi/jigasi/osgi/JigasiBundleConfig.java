@@ -23,6 +23,7 @@ import org.jitsi.impl.neomedia.*;
 import org.jitsi.impl.neomedia.device.*;
 import org.jitsi.impl.neomedia.transform.csrc.*;
 import org.jitsi.impl.osgi.framework.launch.*;
+import org.jitsi.jigasi.Trace;
 import org.jitsi.meet.*;
 import org.jitsi.service.configuration.*;
 import org.jitsi.stats.media.*;
@@ -34,6 +35,7 @@ import java.util.*;
  *
  * @author Pawel Domas
  */
+@Trace
 public class JigasiBundleConfig
     extends OSGiBundleConfig
 {

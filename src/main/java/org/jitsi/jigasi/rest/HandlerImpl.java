@@ -117,6 +117,7 @@ import org.osgi.framework.*;
  * @author Damian Minkov
  * @author Nik Vaessen
  */
+@Trace
 public class HandlerImpl
     extends AbstractJSONHandler
     implements GatewayListener

@@ -28,6 +28,7 @@ import java.util.concurrent.atomic.*;
 /**
  * Used to queue audio files for playback. This is used for the IVR.
  */
+@Trace
 class PlaybackQueue
     extends Thread
 {

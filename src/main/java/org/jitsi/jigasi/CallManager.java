@@ -34,6 +34,7 @@ import java.util.concurrent.*;
  * @author Pawel Domas
  * @author Damian Minkov
  */
+@Trace
 public class CallManager
 {
     private final static Logger logger = Logger.getLogger(CallManager.class);

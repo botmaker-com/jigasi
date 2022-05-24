@@ -18,6 +18,7 @@
 package org.jitsi.jigasi.transcription;
 
 import net.java.sip.communicator.service.protocol.*;
+import org.jitsi.jigasi.Trace;
 import org.json.*;
 
 import java.time.*;
@@ -51,6 +52,7 @@ import java.util.*;
  * @author Nik Vaessen
  * @author Damian Minkov
  */
+@Trace
 public class LocalJsonTranscriptHandler
     extends AbstractTranscriptPublisher<JSONObject>
 {

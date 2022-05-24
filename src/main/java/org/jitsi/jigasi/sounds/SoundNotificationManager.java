@@ -40,6 +40,7 @@ import java.util.concurrent.*;
  *
  * @author Damian Minkov
  */
+@Trace
 public class SoundNotificationManager
 {
     /**

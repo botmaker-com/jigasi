@@ -40,6 +40,7 @@ import static net.java.sip.communicator.service.protocol.event.LocalUserChatRoom
  * @author Cristian Florin Ghita
  * @author Damian Minkov
  */
+@Trace
 public class Lobby
     implements ChatRoomInvitationListener,
                LocalUserChatRoomPresenceListener

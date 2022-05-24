@@ -18,6 +18,7 @@
 package org.jitsi.jigasi.transcription;
 
 import net.java.sip.communicator.service.protocol.*;
+import org.jitsi.jigasi.Trace;
 import org.jitsi.utils.logging.*;
 
 import java.time.*;
@@ -29,6 +30,7 @@ import java.util.*;
  *
  * @author Nik Vaessen
  */
+@Trace
 public class LocalTxtTranscriptHandler
     extends AbstractTranscriptPublisher<String>
 {

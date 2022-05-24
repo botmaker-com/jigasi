@@ -41,6 +41,7 @@ import java.util.*;
 /**
  * Handles all the mute/unmute/startMuted logic.
  */
+@Trace
 public class AudioModeration
 {
     /**

@@ -6,5 +6,6 @@ dist
 .idea/*
 jigasi.iml
 
+java-libs
 target
 /.idea/

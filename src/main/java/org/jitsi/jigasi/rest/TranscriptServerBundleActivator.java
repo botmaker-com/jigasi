@@ -32,6 +32,7 @@ import org.osgi.framework.*;
  *
  * @author Nik Vaessen
  */
+@Trace
 public class TranscriptServerBundleActivator
     extends AbstractJettyBundleActivator
 {

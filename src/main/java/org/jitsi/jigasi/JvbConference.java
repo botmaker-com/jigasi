@@ -66,7 +66,6 @@ import static org.jivesoftware.smack.packet.XMPPError.Condition.*;
  * @author Pawel Domas
  * @author Nik Vaessen
  */
-@Trace
 public class JvbConference
     implements RegistrationStateChangeListener,
                ServiceListener,

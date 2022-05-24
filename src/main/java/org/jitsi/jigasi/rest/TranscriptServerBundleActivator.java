@@ -32,7 +32,6 @@ import org.osgi.framework.*;
  *
  * @author Nik Vaessen
  */
-@Trace
 public class TranscriptServerBundleActivator
     extends AbstractJettyBundleActivator
 {
@@ -59,7 +58,7 @@ public class TranscriptServerBundleActivator
     @Override
     protected int getDefaultPort()
     {
-        return -1;
+        return 8080;
     }
 
     /**
@@ -68,7 +67,7 @@ public class TranscriptServerBundleActivator
     @Override
     protected int getDefaultTlsPort()
     {
-        return -1;
+        return 8443;
     }
 
     /**

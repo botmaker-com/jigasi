@@ -33,7 +33,6 @@ import java.util.*;
  * @author Pawel Domas
  * @author Nik Vaessen
  */
-@Trace
 public abstract class AbstractGateway<T extends AbstractGatewaySession>
     implements GatewaySessionListener<T>
 {

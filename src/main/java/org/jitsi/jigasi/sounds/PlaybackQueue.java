@@ -28,7 +28,6 @@ import java.util.concurrent.atomic.*;
 /**
  * Used to queue audio files for playback. This is used for the IVR.
  */
-@Trace
 class PlaybackQueue
     extends Thread
 {
@@ -172,16 +171,19 @@ class PlaybackQueue
                           PlaybackDelegate delegate)
         throws InterruptedException
     {
-        if ((fileName.equals(SoundNotificationManager.PARTICIPANT_JOINED)
-            || fileName.equals(SoundNotificationManager.PARTICIPANT_LEFT))
-            && playbackQueue.contains(fileName))
-        {
-            // just in case, we do not want to spam user with leave and join events
-            return;
-        }
+//        if ((fileName.equals(SoundNotificationManager.PARTICIPANT_JOINED)
+//            || fileName.equals(SoundNotificationManager.PARTICIPANT_LEFT))
+//            && playbackQueue.contains(fileName))
+//        {
+//            // just in case, we do not want to spam user with leave and join events
+//            return;
+//        }
 
         // if the queue has no capacity we will block playing the sound till there is space
         // and playing may depend on signalling and if we block smack thread we can stop the signalling
+
+        System.out.println("playbackQueue.remainingCapacity(): " +playbackQueue.remainingCapacity());
+
         if (playbackQueue.remainingCapacity() == 0)
         {
             Object callContext = call.getData(CallContext.class);
@@ -189,6 +191,7 @@ class PlaybackQueue
             return;
         }
 
+        System.out.println("playbackQueue.put");
         playbackQueue.put(new PlaybackData(fileName, delegate, call));
     }
 
@@ -213,7 +216,9 @@ class PlaybackQueue
             Call playbackCall = null;
             try
             {
+                System.out.println("playbackQueue.size " + playbackQueue.size());
                 PlaybackData playbackData = playbackQueue.take();
+                System.out.println("playbackData: " + playbackData);
 
                 if (playbackData != null)
                 {

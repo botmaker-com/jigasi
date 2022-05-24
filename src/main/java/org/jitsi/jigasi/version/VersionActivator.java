@@ -15,7 +15,6 @@
  */
 package org.jitsi.jigasi.version;
 
-import org.jitsi.jigasi.Trace;
 import org.jitsi.utils.version.*;
 import org.jitsi.version.*;
 
@@ -25,7 +24,6 @@ import org.jitsi.version.*;
  *
  * @author Boris Grozev
  */
-@Trace
 public class VersionActivator
         extends AbstractVersionActivator
 {

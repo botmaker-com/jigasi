@@ -40,7 +40,6 @@ import java.util.concurrent.*;
  *
  * @author Damian Minkov
  */
-@Trace
 public class SoundNotificationManager
 {
     /**
@@ -656,6 +655,7 @@ public class SoundNotificationManager
     {
         try
         {
+            System.out.println("gatewaySession.getSipCall(): " + gatewaySession.getSipCall());
             if (gatewaySession.getSipCall() != null)
             {
                 if (gatewaySession.getSipCall().getCallState()

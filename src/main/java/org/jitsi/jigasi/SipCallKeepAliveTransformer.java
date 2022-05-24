@@ -38,7 +38,6 @@ import java.util.*;
  *
  * @author Damian Minkov
  */
-@Trace
 public class SipCallKeepAliveTransformer
     extends SinglePacketTransformerAdapter
     implements TransformEngine

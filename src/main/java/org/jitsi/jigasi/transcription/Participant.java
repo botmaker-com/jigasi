@@ -19,7 +19,6 @@ package org.jitsi.jigasi.transcription;
 
 import net.java.sip.communicator.impl.protocol.jabber.*;
 import net.java.sip.communicator.service.protocol.*;
-import org.jitsi.jigasi.Trace;
 import org.jitsi.jigasi.util.Util;
 import org.jitsi.xmpp.extensions.jitsimeet.*;
 import org.jitsi.utils.logging.*;
@@ -37,9 +36,7 @@ import java.util.concurrent.*;
  *
  * @author Nik Vaessen
  * @author Boris Grozev
- */
-@Trace
-public class Participant
+ */public class Participant
     implements TranscriptionListener
 {
     /**

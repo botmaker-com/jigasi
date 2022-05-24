@@ -18,7 +18,6 @@
 package org.jitsi.jigasi.transcription.action;
 
 import net.java.sip.communicator.util.*;
-import org.jitsi.jigasi.Trace;
 import org.jitsi.jigasi.transcription.*;
 import org.jitsi.service.configuration.*;
 import org.jitsi.utils.logging.Logger;
@@ -43,7 +42,6 @@ import java.util.stream.*;
  *
  * @author Damian Minkov
  */
-@Trace
 public class ActionServicesHandler
 {
     /**

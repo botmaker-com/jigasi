@@ -31,7 +31,6 @@ import org.osgi.framework.*;
  * @author Pawel Domas
  * @author Nik Vaessen
  */
-@Trace
 public class SipGateway
     extends AbstractGateway<SipGatewaySession>
     implements RegistrationStateChangeListener

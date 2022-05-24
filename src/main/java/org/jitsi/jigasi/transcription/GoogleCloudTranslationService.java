@@ -19,7 +19,6 @@ package org.jitsi.jigasi.transcription;
 
 import com.google.cloud.translate.*;
 import com.google.cloud.translate.Translate.*;
-import org.jitsi.jigasi.Trace;
 
 /**
  * Implements a {@link TranslationService} which will use Google Cloud
@@ -32,7 +31,6 @@ import org.jitsi.jigasi.Trace;
  *
  * @author Praveen Kumar Gupta
  */
-@Trace
 public class GoogleCloudTranslationService
     implements TranslationService
 {

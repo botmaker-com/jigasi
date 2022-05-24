@@ -22,4 +22,6 @@ fi
 
 if [ -z "$JIGASI_MAX_MEMORY" ]; then JIGASI_MAX_MEMORY=3072m; fi
 
-LD_LIBRARY_PATH=$libs exec java -Xmx$JIGASI_MAX_MEMORY -Djava.library.path=$libs $LOGGING_CONFIG_PARAM $JAVA_SYS_PROPS -cp $cp $mainClass $@
+#LD_LIBRARY_PATH=$libs exec java -Xmx$JIGASI_MAX_MEMORY -Djava.library.path=$libs $LOGGING_CONFIG_PARAM $JAVA_SYS_PROPS -cp $cp $mainClass $@
+echo LD_LIBRARY_PATH=$libs exec java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:5005 -Xmx$JIGASI_MAX_MEMORY -Djava.library.path=$libs $LOGGING_CONFIG_PARAM $JAVA_SYS_PROPS -cp $cp $mainClass $@
+LD_LIBRARY_PATH=$libs exec java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:5005 -Xmx$JIGASI_MAX_MEMORY -Djava.library.path=$libs $LOGGING_CONFIG_PARAM $JAVA_SYS_PROPS -cp $cp $mainClass $@

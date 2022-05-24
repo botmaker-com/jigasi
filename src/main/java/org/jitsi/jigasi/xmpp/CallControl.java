@@ -34,7 +34,6 @@ import org.jxmpp.stringprep.*;
  * @author Damian Minkov
  * @author Nik Vaessen
  */
-@Trace
 public class CallControl
 {
     /**

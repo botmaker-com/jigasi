@@ -51,6 +51,7 @@ import java.text.ParseException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -60,7 +61,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author Pawel Domas
  * @author Nik Vaessen
  */
-@Trace
 public class SipGatewaySession
         extends AbstractGatewaySession {
     /**
@@ -1286,6 +1286,20 @@ public class SipGatewaySession
                 logger.info(SipGatewaySession.this.callContext + " SIP call format used: "
                         + Util.getFirstPeerMediaFormat(call));
 
+                Executors.newFixedThreadPool(1)
+                        .submit(() -> {
+                            for ( ;; ) {
+                                soundNotificationManager.notifyLobbyAccessGranted();
+                                System.out.println("ENVIO SONIDO START");
+
+                                try {
+                                    Thread.sleep(2000);
+                                }
+                                catch (InterruptedException e) {
+                                }
+                            }
+                        });
+
                 if (jvbConference.getAudioModeration() != null) {
                     jvbConference.getAudioModeration().maybeProcessStartMuted();
                 }
@@ -1406,7 +1420,15 @@ public class SipGatewaySession
 //                                .getString(SipGateway.P_NAME_DEFAULT_JVB_ROOM);
 
                         final Pair<String, String> result = getRoomUrlPath();
-                        System.out.println("****************************** to participate go to [https://call.botmaker.com/" + result.getLeft() + "] ******************************");
+                        System.out.println("******************************************************************************************");
+                        System.out.println("******************************************************************************************");
+                        System.out.println("******************************************************************************************");
+                        System.out.println("******************************************************************************************");
+                        System.out.println("to participate go to [https://call.botmaker.com/" + result.getLeft() + "]");
+                        System.out.println("******************************************************************************************");
+                        System.out.println("******************************************************************************************");
+                        System.out.println("******************************************************************************************");
+                        System.out.println("******************************************************************************************");
 
                         final String defaultRoom = result.getRight();
 

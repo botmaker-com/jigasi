@@ -29,7 +29,6 @@ import java.util.*;
  *
  * @author Nik Vaessen
  */
-@Trace
 public class TranscriptHandler
 {
     /**

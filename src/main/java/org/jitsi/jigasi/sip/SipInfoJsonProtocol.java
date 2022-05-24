@@ -20,7 +20,6 @@ package org.jitsi.jigasi.sip;
 import net.java.sip.communicator.service.protocol.*;
 import net.java.sip.communicator.util.*;
 
-import org.jitsi.jigasi.Trace;
 import org.json.simple.*;
 
 import java.util.*;
@@ -45,7 +44,6 @@ import java.util.*;
  *
  * This class is used to define sip info protocol.
  */
-@Trace
 public class SipInfoJsonProtocol
 {
     /**

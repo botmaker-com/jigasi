@@ -17,8 +17,6 @@
  */
 package org.jitsi.jigasi.transcription;
 
-import org.jitsi.jigasi.Trace;
-
 import java.time.*;
 import java.util.*;
 
@@ -28,7 +26,6 @@ import java.util.*;
  *
  * @author Nik Vaessen
  */
-@Trace
 public class Transcript
     implements TranscriptionListener
 {

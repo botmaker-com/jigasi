@@ -15,7 +15,6 @@
  */
 package org.jitsi.jigasi.version;
 
-import org.jitsi.jigasi.Trace;
 import org.jitsi.utils.version.*;
 
 import java.util.regex.*;
@@ -28,7 +27,6 @@ import java.util.regex.*;
  *
  * @author Boris Grozev
  */
-@Trace
 public class CurrentVersionImpl
 {
     /**

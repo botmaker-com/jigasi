@@ -33,7 +33,6 @@ import java.util.*;
  *
  * @author Damian Minkov
  */
-@Trace
 public class CallContext
 {
     private final static Logger logger = Logger.getLogger(CallContext.class);

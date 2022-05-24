@@ -18,7 +18,6 @@
 package org.jitsi.jigasi.transcription;
 
 import net.java.sip.communicator.service.protocol.*;
-import org.jitsi.jigasi.Trace;
 import org.json.*;
 
 import java.util.*;
@@ -28,7 +27,6 @@ import java.util.*;
  *
  * @author Damian Minkov
  */
-@Trace
 public class RemotePublisherTranscriptionHandler
     extends LocalJsonTranscriptHandler
     implements TranscriptionEventListener

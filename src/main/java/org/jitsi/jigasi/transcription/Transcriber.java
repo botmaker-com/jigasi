@@ -40,7 +40,6 @@ import java.util.concurrent.*;
  *
  * @author Nik Vaessen
  */
-@Trace
 public class Transcriber
     implements ReceiveStreamBufferListener
 {

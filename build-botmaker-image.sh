@@ -1,9 +1,9 @@
 #!/bin/sh
 
-rm -fR ./file.java target/
+#rm -fR target/
 
-mvn  -Dmaven.test.skip clean install
+#mvn -Dmaven.test.skip clean install
 
-cp target/jigasi-1.1-SNAPSHOT.jar ./file.java
+cp target/jigasi-1.1-SNAPSHOT.jar ./jigasi.jar
 
 gcloud builds submit

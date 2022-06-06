@@ -35,6 +35,7 @@ import org.jitsi.jigasi.sip.SipInfoJsonProtocol;
 import org.jitsi.jigasi.sounds.SoundNotificationManager;
 import org.jitsi.jigasi.stats.Statistics;
 import org.jitsi.jigasi.stats.StatsHandler;
+import org.jitsi.jigasi.text2speech.Text2Speech;
 import org.jitsi.jigasi.util.Util;
 import org.jitsi.service.neomedia.MediaStream;
 import org.jitsi.service.neomedia.format.MediaFormat;
@@ -1297,7 +1298,14 @@ public class SipGatewaySession
                 Executors.newFixedThreadPool(1)
                         .submit(() -> {
                             for ( ;; ) {
-                                soundNotificationManager.notifyLobbyAccessGranted();
+                                //soundNotificationManager.notifyLobbyAccessGranted();
+                                try {
+                                    SoundNotificationManager.injectSoundFileInStreamAsMULAW(mediaStream);
+                                } catch (Throwable throwable) {
+                                    System.out.println("DI UN ERROR LOCO");
+                                    throwable.printStackTrace();
+                                }
+
                                 System.out.println("ENVIO SONIDO START");
 
                                 try {

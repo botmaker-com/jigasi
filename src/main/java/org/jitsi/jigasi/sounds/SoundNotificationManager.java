@@ -18,6 +18,7 @@
 package org.jitsi.jigasi.sounds;
 
 import com.google.common.collect.Lists;
+import net.java.sip.communicator.impl.protocol.sip.xcap.utils.StreamUtils;
 import net.java.sip.communicator.service.protocol.*;
 import net.java.sip.communicator.service.protocol.media.*;
 import net.java.sip.communicator.util.*;
@@ -38,9 +39,7 @@ import org.jivesoftware.smack.packet.*;
 
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
+import java.io.*;
 import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.concurrent.*;
@@ -321,21 +320,36 @@ public class SoundNotificationManager {
         }
     }
 
-/*    public static void main(String[] args) {
-        injectSoundFileInStreamAsMULAW();
-    }*/
+    public static void main(String[] args) {
+        final byte[] bytes = Text2Speech.textToSpeech("Hola! Soy Hernan");
 
-    public static void injectSoundFileInStreamAsMULAW(MediaStream stream)
+        // Write the response to the output file.
+        try (OutputStream out = new FileOutputStream("./output.alaw")) {
+            out.write(bytes);
+            System.out.println("Audio content written to file \"output.alaw\"");
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public static void injectSoundFileInStreamAsMULAW(MediaStream stream, String file)
             throws Throwable {
 
-        final byte[] audioBytes = Text2Speech.textToSpeech("Hola! Soy Diego");
+        //final byte[] audioBytes = Text2Speech.textToSpeech("Hola! Soy Diego");
 
-        AudioInputStream audioStream = AudioSystem.getAudioInputStream(new BufferedInputStream(new ByteArrayInputStream(audioBytes)));
+        //AudioInputStream audioStream = AudioSystem.getAudioInputStream(new BufferedInputStream(new ByteArrayInputStream(audioBytes)));
+        AudioInputStream audioStream = AudioSystem.getAudioInputStream(new BufferedInputStream(
+                new FileInputStream(file)));
 
         final int frameSize = audioStream.getFormat().getFrameSize();
         System.out.println("[INJECT-AUDIO] Frame Size " + frameSize);
 
         //OpusFile of = new OpusFile(new OggPacketReader(Util.class.getClassLoader().getResourceAsStream(fileName)));
+
+        final byte[] audioBytes = StreamUtils.read(audioStream);
 
         final int packetQty = audioBytes.length / frameSize;
         System.out.println("[INJECT-AUDIO] Packet Quantity " + packetQty);

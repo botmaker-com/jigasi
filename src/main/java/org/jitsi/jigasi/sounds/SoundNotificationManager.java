@@ -312,14 +312,14 @@ public class SoundNotificationManager
 
         // if there is no stream or the calling account is not using translator
         // or the current call is not using opus
-        if (stream == null
-            || !call.getProtocolProvider().getAccountID().getAccountPropertyBoolean(
-                    ProtocolProviderFactory.USE_TRANSLATOR_IN_CONFERENCE, false)
-            || stream.getDynamicRTPPayloadType(Constants.OPUS) == -1
-            || fileName == null)
-        {
-            return;
-        }
+//        if (stream == null
+//            || !call.getProtocolProvider().getAccountID().getAccountPropertyBoolean(
+//                    ProtocolProviderFactory.USE_TRANSLATOR_IN_CONFERENCE, false)
+//            || stream.getDynamicRTPPayloadType(Constants.OPUS) == -1
+//            || fileName == null)
+//        {
+//            return;
+//        }
 
         final MediaStream streamToPass = stream;
 

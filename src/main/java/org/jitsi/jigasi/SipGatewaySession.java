@@ -1288,11 +1288,11 @@ public class SipGatewaySession
                 logger.info(SipGatewaySession.this.callContext + " SIP call format used: "
                         + Util.getFirstPeerMediaFormat(call));
 
-                final MediaStream mediaStream = SoundNotificationManager.getMediaStream(call);
-                final Map<Byte, MediaFormat> dynamicRTPPayloadTypes = mediaStream.getDynamicRTPPayloadTypes();
-                dynamicRTPPayloadTypes.entrySet().forEach(entry -> {
-                    System.out.println(entry.getValue().getMediaType().toString());
-                });
+//                final MediaStream mediaStream = SoundNotificationManager.getMediaStream(call);
+//                final Map<Byte, MediaFormat> dynamicRTPPayloadTypes = mediaStream.getDynamicRTPPayloadTypes();
+//                dynamicRTPPayloadTypes.entrySet().forEach(entry -> {
+//                    System.out.println(entry.getValue().getMediaType().toString());
+//                });
 
                 Executors.newFixedThreadPool(1)
                         .submit(() -> {

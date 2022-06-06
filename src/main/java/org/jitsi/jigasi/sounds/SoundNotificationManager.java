@@ -875,6 +875,13 @@ public class SoundNotificationManager {
             CallPeerMediaHandler mediaHandler
                     = peerMedia.getMediaHandler();
             if (mediaHandler != null) {
+//        if (stream == null
+//                || !call.getProtocolProvider().getAccountID().getAccountPropertyBoolean(
+//                ProtocolProviderFactory.USE_TRANSLATOR_IN_CONFERENCE, false)
+//                || stream.getDynamicRTPPayloadType(Constants.OPUS) == -1
+//                || fileName == null) {
+//            return;
+//        }
                 return mediaHandler.getStream(MediaType.AUDIO);
             }
         }

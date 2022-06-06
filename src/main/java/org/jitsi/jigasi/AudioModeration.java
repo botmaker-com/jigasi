@@ -634,6 +634,7 @@ public class AudioModeration
 
             try
             {
+                System.out.println("------------------ json from xmpp" + jsonMsg.getJson());
                 Object o = new JSONParser().parse(jsonMsg.getJson());
 
                 if (o instanceof JSONObject)

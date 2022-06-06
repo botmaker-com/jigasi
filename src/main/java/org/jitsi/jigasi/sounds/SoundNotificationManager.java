@@ -17,14 +17,18 @@
  */
 package org.jitsi.jigasi.sounds;
 
+import com.google.common.collect.Lists;
 import net.java.sip.communicator.service.protocol.*;
 import net.java.sip.communicator.service.protocol.media.*;
 import net.java.sip.communicator.util.*;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.gagravarr.ogg.*;
 import org.gagravarr.opus.*;
 import org.jitsi.impl.neomedia.*;
 import org.jitsi.impl.neomedia.codec.*;
 import org.jitsi.jigasi.*;
+import org.jitsi.jigasi.text2speech.Text2Speech;
 import org.jitsi.jigasi.util.*;
 import org.jitsi.service.neomedia.*;
 import org.jitsi.service.neomedia.codec.*;
@@ -32,6 +36,12 @@ import org.jitsi.utils.*;
 import org.jitsi.xmpp.extensions.jibri.*;
 import org.jivesoftware.smack.packet.*;
 
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
+import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -40,13 +50,12 @@ import java.util.concurrent.*;
  *
  * @author Damian Minkov
  */
-public class SoundNotificationManager
-{
+public class SoundNotificationManager {
     /**
      * The logger.
      */
     private final static Logger logger = Logger.getLogger(
-        SoundNotificationManager.class);
+            SoundNotificationManager.class);
 
     /**
      * The sound file to use when recording is ON.
@@ -62,19 +71,19 @@ public class SoundNotificationManager
      * The sound file to use when live streaming is ON.
      */
     private static final String LIVE_STREAMING_ON_SOUND
-        = "sounds/LiveStreamingOn.opus";
+            = "sounds/LiveStreamingOn.opus";
 
     /**
      * The sound file to use when live streaming is OFF.
      */
     private static final String LIVE_STREAMING_OFF_SOUND
-        = "sounds/LiveStreamingOff.opus";
+            = "sounds/LiveStreamingOff.opus";
 
     /**
      * The sound file to use when the max occupants limit is reached.
      */
     private static final String MAX_OCCUPANTS_SOUND
-        = "sounds/MaxOccupants.opus";
+            = "sounds/MaxOccupants.opus";
 
     /**
      * The sound file to use to notify sip participant that
@@ -211,35 +220,32 @@ public class SoundNotificationManager
      *
      * @param gatewaySession The sip session using this instance.
      */
-    public SoundNotificationManager(SipGatewaySession gatewaySession)
-    {
+    public SoundNotificationManager(SipGatewaySession gatewaySession) {
         this.gatewaySession = gatewaySession;
     }
 
     /**
      * Returns the call context for the current session.
-
+     *
      * @return the call context for the current session.
      */
-    private CallContext getCallContext()
-    {
+    private CallContext getCallContext() {
         return this.gatewaySession.getCallContext();
     }
 
     /**
      * Processes a member presence change.
+     *
      * @param presence the presence to process.
      */
-    public void process(Presence presence)
-    {
+    public void process(Presence presence) {
         RecordingStatus rs = presence.getExtension(
-            RecordingStatus.ELEMENT_NAME,
-            RecordingStatus.NAMESPACE);
+                RecordingStatus.ELEMENT_NAME,
+                RecordingStatus.NAMESPACE);
 
         if (rs != null
-            && gatewaySession.getFocusResourceAddr().equals(
-                presence.getFrom().getResourceOrEmpty().toString()))
-        {
+                && gatewaySession.getFocusResourceAddr().equals(
+                presence.getFrom().getResourceOrEmpty().toString())) {
             notifyRecordingStatusChanged(rs.getRecordingMode(), rs.getStatus());
         }
     }
@@ -247,48 +253,35 @@ public class SoundNotificationManager
     /**
      * Method called notify that a recording status change was detected.
      *
-     * @param mode The recording mode.
+     * @param mode   The recording mode.
      * @param status The recording status.
      */
     private void notifyRecordingStatusChanged(
-        JibriIq.RecordingMode mode, JibriIq.Status status)
-    {
+            JibriIq.RecordingMode mode, JibriIq.Status status) {
         // not a change, ignore
-        if (currentJibriStatus.equals(status))
-        {
+        if (currentJibriStatus.equals(status)) {
             return;
         }
         currentJibriStatus = status;
 
         String offSound;
-        if (mode.equals(JibriIq.RecordingMode.FILE))
-        {
+        if (mode.equals(JibriIq.RecordingMode.FILE)) {
             currentJibriOnSound = REC_ON_SOUND;
             offSound = REC_OFF_SOUND;
-        }
-        else if (mode.equals(JibriIq.RecordingMode.STREAM))
-        {
+        } else if (mode.equals(JibriIq.RecordingMode.STREAM)) {
             currentJibriOnSound = LIVE_STREAMING_ON_SOUND;
             offSound = LIVE_STREAMING_OFF_SOUND;
-        }
-        else
-        {
+        } else {
             return;
         }
 
-        try
-        {
-            if (JibriIq.Status.ON.equals(status) && !getRecordingOnRateLimiter().on())
-            {
+        try {
+            if (JibriIq.Status.ON.equals(status) && !getRecordingOnRateLimiter().on()) {
                 playbackQueue.queueNext(gatewaySession.getSipCall(), currentJibriOnSound);
-            }
-            else if (JibriIq.Status.OFF.equals(status))
-            {
+            } else if (JibriIq.Status.OFF.equals(status)) {
                 playbackQueue.queueNext(gatewaySession.getSipCall(), offSound);
             }
-        }
-        catch(InterruptedException ex)
-        {
+        } catch (InterruptedException ex) {
             logger.error(getCallContext() + " Error playing sound notification");
         }
     }
@@ -298,53 +291,127 @@ public class SoundNotificationManager
      * method and constructing RTP packets for it.
      * Supports opus only (when using translator mode calls from the jitsi-meet
      * side are using opus and are just translated to the sip side).
-     *
+     * <p>
      * The file will be played if possible, if there is call passed and that
      * call has call peers of type MediaAwareCallPeer with media handler that
      * has MediaStream for Audio.
      *
-     * @param call the call (sip one) to inject the sound as rtp.
+     * @param call     the call (sip one) to inject the sound as rtp.
      * @param fileName the file name to play.
      */
-    public static void injectSoundFile(Call call, String fileName)
-    {
+    public static void injectSoundFile(Call call, String fileName) {
         MediaStream stream = getMediaStream(call);
 
         // if there is no stream or the calling account is not using translator
         // or the current call is not using opus
-//        if (stream == null
-//            || !call.getProtocolProvider().getAccountID().getAccountPropertyBoolean(
-//                    ProtocolProviderFactory.USE_TRANSLATOR_IN_CONFERENCE, false)
-//            || stream.getDynamicRTPPayloadType(Constants.OPUS) == -1
-//            || fileName == null)
-//        {
-//            return;
-//        }
+        if (stream == null
+                || !call.getProtocolProvider().getAccountID().getAccountPropertyBoolean(
+                ProtocolProviderFactory.USE_TRANSLATOR_IN_CONFERENCE, false)
+                || stream.getDynamicRTPPayloadType(Constants.OPUS) == -1
+                || fileName == null) {
+            return;
+        }
 
         final MediaStream streamToPass = stream;
 
-        try
-        {
+        try {
             injectSoundFileInStream(streamToPass, fileName);
-        }
-        catch (Throwable t)
-        {
+        } catch (Throwable t) {
             logger.error(call.getData(CallContext.class) + " Error playing:" + fileName, t);
         }
     }
 
+/*    public static void main(String[] args) {
+        injectSoundFileInStreamAsMULAW();
+    }*/
+
+    public static void injectSoundFileInStreamAsMULAW(MediaStream stream)
+            throws Throwable {
+
+        final byte[] audioBytes = Text2Speech.textToSpeech("Hola! Soy Diego");
+
+        AudioInputStream audioStream = AudioSystem.getAudioInputStream(new BufferedInputStream(new ByteArrayInputStream(audioBytes)));
+
+        final int frameSize = audioStream.getFormat().getFrameSize();
+        System.out.println("[INJECT-AUDIO] Frame Size " + frameSize);
+
+        //OpusFile of = new OpusFile(new OggPacketReader(Util.class.getClassLoader().getResourceAsStream(fileName)));
+
+        final int packetQty = audioBytes.length / frameSize;
+        System.out.println("[INJECT-AUDIO] Packet Quantity " + packetQty);
+
+        //OpusAudioData opusAudioData;
+        // Random timestamp, ssrc and seq
+        final int[] seq = {new Random().nextInt(0xFFFF)};
+        final long[] ts = {new Random().nextInt(0xFFFF)};
+        long ssrc = new Random().nextInt(0xFFFF);
+        byte pt = stream.getDynamicRTPPayloadType(Constants.ALAW_RTP); //G711 -> a-law / mu-law
+        final long[] timeForNextPacket = {System.currentTimeMillis()};
+        final long[] sentDuration = {0};
+
+
+        for (int packetIndex = 0; packetIndex < packetQty; packetIndex++) {
+
+            // seq may rollover
+            if (seq[0] > AbstractCodec2.SEQUENCE_MAX) {
+                seq[0] = 0;
+            }
+
+            long nSamples = audioStream.getFrameLength();
+            ts[0] += nSamples;
+            // timestamp may rollover
+            if (ts[0] > TimestampUtils.MAX_TIMESTAMP_VALUE) {
+                ts[0] = ts[0] - TimestampUtils.MAX_TIMESTAMP_VALUE;
+            }
+
+            final byte[] data = new byte[frameSize];
+            final ByteBuffer byteBuffer = ByteBuffer.wrap(audioBytes);
+            byteBuffer.get(data, 0, Math.min(data.length, byteBuffer.limit()));
+            //final byte[] data = Arrays.copyOfRange(audioBytes, packetIndex * frameSize, (((packetIndex + 1) * frameSize) - 1));
+            RawPacket rtp = Util.makeRTP(
+                    ssrc, // ssrc
+                    pt, // payload
+                    seq[0]++, /// seq
+                    ts[0], // ts
+                    data.length + RawPacket.FIXED_HEADER_SIZE// len
+            );
+            rtp.setSkipStats(true);
+
+            System.out.println(rtp);
+
+            System.arraycopy(
+                    data, 0, rtp.getBuffer(), rtp.getPayloadOffset(), data.length);
+            long duration = nSamples / 48;
+            timeForNextPacket[0] += duration;
+            sentDuration[0] += duration;
+            if (stream instanceof MediaStreamImpl) {
+                ((MediaStreamImpl) stream).injectPacket(rtp, true, null, true);
+            } else {
+                stream.injectPacket(rtp, true, null);
+            }
+
+            long sleep = timeForNextPacket[0] - System.currentTimeMillis();
+            if (sleep > 0 && sentDuration[0] > 200) // we let the first 200ms to be sent without waiting
+            {
+                Thread.sleep(sleep);
+            }
+        }
+
+    }
+
+
     /**
      * The internal implementation where we read the file and inject it in
      * the stream.
-     * @param stream the stream where we inject the sound as rtp.
+     *
+     * @param stream   the stream where we inject the sound as rtp.
      * @param fileName the file name to play.
      * @throws Throwable cannot read source sound file or cannot transmit it.
      */
     static void injectSoundFileInStream(MediaStream stream, String fileName)
-        throws Throwable
-    {
+            throws Throwable {
         OpusFile of = new OpusFile(new OggPacketReader(
-            Util.class.getClassLoader().getResourceAsStream(fileName)));
+                Util.class.getClassLoader().getResourceAsStream(fileName)));
 
         OpusAudioData opusAudioData;
         // Random timestamp, ssrc and seq
@@ -355,43 +422,37 @@ public class SoundNotificationManager
         long timeForNextPacket = System.currentTimeMillis();
         long sentDuration = 0;
 
-        while ((opusAudioData = of.getNextAudioPacket()) != null)
-        {
+        while ((opusAudioData = of.getNextAudioPacket()) != null) {
             // seq may rollover
-            if (seq > AbstractCodec2.SEQUENCE_MAX)
-            {
+            if (seq > AbstractCodec2.SEQUENCE_MAX) {
                 seq = 0;
             }
 
             int nSamples = opusAudioData.getNumberOfSamples();
             ts += nSamples;
             // timestamp may rollover
-            if (ts > TimestampUtils.MAX_TIMESTAMP_VALUE)
-            {
+            if (ts > TimestampUtils.MAX_TIMESTAMP_VALUE) {
                 ts = ts - TimestampUtils.MAX_TIMESTAMP_VALUE;
             }
 
             byte[] data = opusAudioData.getData();
             RawPacket rtp = Util.makeRTP(
-                ssrc, // ssrc
-                pt, // payload
-                seq++, /// seq
-                ts, // ts
-                data.length + RawPacket.FIXED_HEADER_SIZE// len
+                    ssrc, // ssrc
+                    pt, // payload
+                    seq++, /// seq
+                    ts, // ts
+                    data.length + RawPacket.FIXED_HEADER_SIZE// len
             );
             rtp.setSkipStats(true);
 
             System.arraycopy(
-                data, 0, rtp.getBuffer(), rtp.getPayloadOffset(), data.length);
-            int duration = nSamples/48;
+                    data, 0, rtp.getBuffer(), rtp.getPayloadOffset(), data.length);
+            int duration = nSamples / 48;
             timeForNextPacket += duration;
             sentDuration += duration;
-            if (stream instanceof MediaStreamImpl)
-            {
-                ((MediaStreamImpl)stream).injectPacket(rtp, true, null, true);
-            }
-            else
-            {
+            if (stream instanceof MediaStreamImpl) {
+                ((MediaStreamImpl) stream).injectPacket(rtp, true, null, true);
+            } else {
                 stream.injectPacket(rtp, true, null);
             }
 
@@ -410,60 +471,44 @@ public class SoundNotificationManager
      *
      * @param callPeerState The call peer state to process.
      */
-    public void process(CallPeerState callPeerState)
-    {
+    public void process(CallPeerState callPeerState) {
         long delayedHangupSeconds = -1;
 
-        if (CallPeerState.BUSY.equals(callPeerState))
-        {
+        if (CallPeerState.BUSY.equals(callPeerState)) {
             // Hangup the call with 5 sec delay, so that we can see BUSY
             // status in jitsi-meet
             delayedHangupSeconds = 5 * 1000;
         }
 
         // when someone connects and recording is on, play notification
-        if (CallPeerState.CONNECTED.equals(callPeerState))
-        {
-            try
-            {
-                if (currentJibriStatus.equals(JibriIq.Status.ON) && !getRecordingOnRateLimiter().on())
-                {
+        if (CallPeerState.CONNECTED.equals(callPeerState)) {
+            try {
+                if (currentJibriStatus.equals(JibriIq.Status.ON) && !getRecordingOnRateLimiter().on()) {
                     playbackQueue.queueNext(gatewaySession.getSipCall(), currentJibriOnSound);
                 }
 
-                if (callMaxOccupantsLimitReached)
-                {
+                if (callMaxOccupantsLimitReached) {
                     playbackQueue.queueNext(gatewaySession.getSipCall(), MAX_OCCUPANTS_SOUND);
 
                     delayedHangupSeconds = MAX_OCCUPANTS_SOUND_DURATION_SEC * 1000;
-                }
-                else
-                {
+                } else {
                     playbackQueue.start();
 
                     playParticipantJoinedNotification();
                 }
-            }
-            catch(InterruptedException ex)
-            {
+            } catch (InterruptedException ex) {
                 logger.error(getCallContext() + " Error playing sound notification");
             }
-        }
-        else if (CallPeerState.DISCONNECTED.equals(callPeerState))
-        {
+        } else if (CallPeerState.DISCONNECTED.equals(callPeerState)) {
             playbackQueue.stopAtNextPlayback();
         }
 
-        if (delayedHangupSeconds != -1)
-        {
+        if (delayedHangupSeconds != -1) {
             final long mills = delayedHangupSeconds;
             new Thread(() -> {
-                try
-                {
+                try {
                     Thread.sleep(mills);
-                }
-                catch(InterruptedException e)
-                {
+                } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
                 CallManager.hangupCall(gatewaySession.getSipCall());
@@ -477,8 +522,7 @@ public class SoundNotificationManager
     /**
      * Stops playback.
      */
-    public void stop()
-    {
+    public void stop() {
         this.playbackQueue.stopAtNextPlayback();
     }
 
@@ -487,31 +531,24 @@ public class SoundNotificationManager
      * need to answer the call once connected, play the sound and then wait for
      * the hangup before returning.
      */
-    public void indicateMaxOccupantsLimitReached()
-    {
+    public void indicateMaxOccupantsLimitReached() {
         callMaxOccupantsLimitReached = true;
 
         // will wait for answering and then the hangup before returning
         hangupWait = new CountDownLatch(1);
 
         // answer play and hangup
-        try
-        {
+        try {
             CallManager.acceptCall(gatewaySession.getSipCall());
-        }
-        catch(OperationFailedException e)
-        {
+        } catch (OperationFailedException e) {
             logger.error(getCallContext() + " Cannot answer call to play max occupants sound", e);
             return;
         }
 
-        try
-        {
+        try {
             hangupWait.await(
-                MAX_OCCUPANTS_SOUND_DURATION_SEC, TimeUnit.SECONDS);
-        }
-        catch(InterruptedException e)
-        {
+                    MAX_OCCUPANTS_SOUND_DURATION_SEC, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
             logger.warn(getCallContext() + " Didn't finish waiting for hangup on max occupants");
         }
     }
@@ -520,24 +557,17 @@ public class SoundNotificationManager
      * Schedules a sound notification playback to notify
      * the participant is the only one in the conference.
      */
-    private void scheduleAloneNotification(long timeout)
-    {
-        synchronized(participantAloneNotificationSync)
-        {
+    private void scheduleAloneNotification(long timeout) {
+        synchronized (participantAloneNotificationSync) {
             this.cancelAloneNotification();
 
             this.participantAloneNotificationTask
-                = new TimerTask()
-            {
+                    = new TimerTask() {
                 @Override
-                public void run()
-                {
-                    try
-                    {
+                public void run() {
+                    try {
                         playParticipantAloneNotification();
-                    }
-                    catch(Exception ex)
-                    {
+                    } catch (Exception ex) {
                         logger.error(getCallContext() + ex.getMessage(), ex);
                     }
                 }
@@ -550,12 +580,9 @@ public class SoundNotificationManager
     /**
      * Cancels the participant alone notification.
      */
-    private void cancelAloneNotification()
-    {
-        synchronized(participantAloneNotificationSync)
-        {
-            if (this.participantAloneNotificationTask != null)
-            {
+    private void cancelAloneNotification() {
+        synchronized (participantAloneNotificationSync) {
+            if (this.participantAloneNotificationTask != null) {
                 this.participantAloneNotificationTask.cancel();
             }
         }
@@ -564,22 +591,18 @@ public class SoundNotificationManager
     /**
      * Called when no other participant is left in the conference.
      */
-    public void onJvbCallEnded()
-    {
+    public void onJvbCallEnded() {
         scheduleAloneNotification(0);
 
-        if (this.participantJoinedRateLimiterLazy != null)
-        {
+        if (this.participantJoinedRateLimiterLazy != null) {
             this.participantJoinedRateLimiterLazy.reset();
         }
 
-        if (this.participantLeftRateLimiterLazy != null)
-        {
+        if (this.participantLeftRateLimiterLazy != null) {
             participantLeftRateLimiterLazy.reset();
         }
 
-        if (this.recordingOnRateLimiterLazy != null)
-        {
+        if (this.recordingOnRateLimiterLazy != null) {
             this.recordingOnRateLimiterLazy.reset();
         }
     }
@@ -589,29 +612,25 @@ public class SoundNotificationManager
      *
      * @param member the member who joined the JVB conference.
      */
-    public void notifyChatRoomMemberJoined(ChatRoomMember member)
-    {
+    public void notifyChatRoomMemberJoined(ChatRoomMember member) {
         boolean sendNotification = false;
 
         Call sipCall = gatewaySession.getSipCall();
         Call jvbCall = gatewaySession.getJvbCall();
 
-        if (sipCall != null)
-        {
+        if (sipCall != null) {
             sendNotification
-                = (sendNotification ||
+                    = (sendNotification ||
                     sipCall.getCallState() == CallState.CALL_IN_PROGRESS);
         }
 
-        if (jvbCall != null)
-        {
+        if (jvbCall != null) {
             sendNotification
-                = (sendNotification ||
+                    = (sendNotification ||
                     jvbCall.getCallState() == CallState.CALL_IN_PROGRESS);
         }
 
-        if (sendNotification)
-        {
+        if (sendNotification) {
             playParticipantJoinedNotification();
         }
 
@@ -623,12 +642,10 @@ public class SoundNotificationManager
      *
      * @param member the member who joined the JVB conference.
      */
-    public void notifyChatRoomMemberLeft(ChatRoomMember member)
-    {
+    public void notifyChatRoomMemberLeft(ChatRoomMember member) {
         // if this is the sip hanging up (stopping) skip playing
         if (gatewaySession.getJvbConference().isStarted()
-            && gatewaySession.getSipCall() != null)
-        {
+                && gatewaySession.getSipCall() != null) {
             playParticipantLeftNotification();
         }
     }
@@ -636,12 +653,10 @@ public class SoundNotificationManager
     /**
      * Called when JVB conference was joined.
      */
-    public void notifyJvbRoomJoined()
-    {
+    public void notifyJvbRoomJoined() {
         int participantCount = gatewaySession.getParticipantsCount();
 
-        if (participantCount <= 2)
-        {
+        if (participantCount <= 2) {
             scheduleAloneNotification(PARTICIPANT_ALONE_TIMEOUT_MS);
         }
     }
@@ -651,46 +666,35 @@ public class SoundNotificationManager
      *
      * @param fileName The sound file to be played.
      */
-    private void playSoundFileIfPossible(String fileName)
-    {
-        try
-        {
+    private void playSoundFileIfPossible(String fileName) {
+        try {
             System.out.println("gatewaySession.getSipCall(): " + gatewaySession.getSipCall());
-            if (gatewaySession.getSipCall() != null)
-            {
+            if (gatewaySession.getSipCall() != null) {
                 if (gatewaySession.getSipCall().getCallState()
-                        != CallState.CALL_IN_PROGRESS)
-                {
+                        != CallState.CALL_IN_PROGRESS) {
                     // Queue playback of file
                     CallManager.acceptCall(gatewaySession.getSipCall());
                 }
 
                 // Hangup in these two cases
-                if (fileName.equals(LOBBY_ACCESS_DENIED) || fileName.equals(LOBBY_MEETING_END))
-                {
-                        playbackQueue.queueNext(
+                if (fileName.equals(LOBBY_ACCESS_DENIED) || fileName.equals(LOBBY_MEETING_END)) {
+                    playbackQueue.queueNext(
                             gatewaySession.getSipCall(),
                             fileName,
                             () -> {
                                 // Hangup
                                 CallManager.hangupCall(gatewaySession.getSipCall());
                             });
-                }
-                else if (fileName.equals(LOBBY_JOIN_REVIEW))
-                {
+                } else if (fileName.equals(LOBBY_JOIN_REVIEW)) {
                     playbackQueue.queueNext(
                             gatewaySession.getSipCall(),
                             fileName,
                             () -> gatewaySession.notifyLobbyJoined());
-                }
-                else
-                {
+                } else {
                     playbackQueue.queueNext(gatewaySession.getSipCall(), fileName);
                 }
             }
-        }
-        catch (Exception ex)
-        {
+        } catch (Exception ex) {
             logger.error(getCallContext() + " " + ex.toString(), ex);
         }
     }
@@ -698,32 +702,28 @@ public class SoundNotificationManager
     /**
      * Called when the user waits for approval to join.
      */
-    public void notifyLobbyWaitReview()
-    {
+    public void notifyLobbyWaitReview() {
         playSoundFileIfPossible(LOBBY_JOIN_REVIEW);
     }
 
     /**
      * Called when the user was granted access to JVB conference.
      */
-    public void notifyLobbyAccessGranted()
-    {
+    public void notifyLobbyAccessGranted() {
         playSoundFileIfPossible(LOBBY_ACCESS_GRANTED);
     }
 
     /**
      * Called when the user was denied access to JVB conference.
      */
-    public void notifyLobbyAccessDenied()
-    {
+    public void notifyLobbyAccessDenied() {
         playSoundFileIfPossible(LOBBY_ACCESS_DENIED);
     }
 
     /**
      * Used to notify the user that the main room was destroyed - meetings has ended.
      */
-    public void notifyLobbyRoomDestroyed()
-    {
+    public void notifyLobbyRoomDestroyed() {
         playSoundFileIfPossible(LOBBY_MEETING_END);
     }
 
@@ -731,24 +731,18 @@ public class SoundNotificationManager
      * Sends sound notification that tells the user
      * is alone in the conference.
      */
-    private void playParticipantAloneNotification()
-    {
-        try
-        {
+    private void playParticipantAloneNotification() {
+        try {
             Call sipCall = gatewaySession.getSipCall();
 
-            if (sipCall != null)
-            {
+            if (sipCall != null) {
                 playbackQueue.queueNext(sipCall, PARTICIPANT_ALONE);
 
-                if (sipCall.getCallState() != CallState.CALL_IN_PROGRESS)
-                {
+                if (sipCall.getCallState() != CallState.CALL_IN_PROGRESS) {
                     CallManager.acceptCall(sipCall);
                 }
             }
-        }
-        catch(Exception ex)
-        {
+        } catch (Exception ex) {
             logger.error(getCallContext() + " " + ex.getMessage(), ex);
         }
     }
@@ -757,22 +751,16 @@ public class SoundNotificationManager
      * Sends sound notification for sip participants if
      * rate limiter allows.
      */
-    private void playParticipantLeftNotification()
-    {
-        try
-        {
-            if (!getParticipantLeftRateLimiter().on())
-            {
+    private void playParticipantLeftNotification() {
+        try {
+            if (!getParticipantLeftRateLimiter().on()) {
                 Call sipCall = gatewaySession.getSipCall();
 
-                if (sipCall != null)
-                {
+                if (sipCall != null) {
                     playbackQueue.queueNext(sipCall, PARTICIPANT_LEFT);
                 }
             }
-        }
-        catch(Exception ex)
-        {
+        } catch (Exception ex) {
             logger.error(getCallContext() + " " + ex.getMessage(), ex);
         }
     }
@@ -781,24 +769,18 @@ public class SoundNotificationManager
      * Sends sound notification for sip participant if
      * rate limiter allows.
      */
-    private void playParticipantJoinedNotification()
-    {
-        try
-        {
+    private void playParticipantJoinedNotification() {
+        try {
             this.cancelAloneNotification();
 
-            if (!getParticipantJoinedRateLimiter().on())
-            {
+            if (!getParticipantJoinedRateLimiter().on()) {
                 Call sipCall = gatewaySession.getSipCall();
 
-                if (sipCall != null)
-                {
+                if (sipCall != null) {
                     playbackQueue.queueNext(gatewaySession.getSipCall(), PARTICIPANT_JOINED);
                 }
             }
-        }
-        catch(Exception ex)
-        {
+        } catch (Exception ex) {
             logger.error(getCallContext() + " " + ex.getMessage());
         }
     }
@@ -809,12 +791,10 @@ public class SoundNotificationManager
      *
      * @return participantAloneNotificationTimerLazy
      */
-    private Timer getParticipantAloneNotificationTimer()
-    {
-        if (this.participantAloneNotificationTimerLazy == null)
-        {
+    private Timer getParticipantAloneNotificationTimer() {
+        if (this.participantAloneNotificationTimerLazy == null) {
             this.participantAloneNotificationTimerLazy
-                = new Timer();
+                    = new Timer();
         }
 
         return participantAloneNotificationTimerLazy;
@@ -826,12 +806,10 @@ public class SoundNotificationManager
      *
      * @return participantLeftRateLimiterLazy
      */
-    private SoundRateLimiter getParticipantLeftRateLimiter()
-    {
-        if (this.participantLeftRateLimiterLazy == null)
-        {
+    private SoundRateLimiter getParticipantLeftRateLimiter() {
+        if (this.participantLeftRateLimiterLazy == null) {
             this.participantLeftRateLimiterLazy
-                = new SoundRateLimiter(PARTICIPANT_LEFT_RATE_TIMEOUT_MS);
+                    = new SoundRateLimiter(PARTICIPANT_LEFT_RATE_TIMEOUT_MS);
         }
 
         return this.participantLeftRateLimiterLazy;
@@ -843,12 +821,10 @@ public class SoundNotificationManager
      *
      * @return participantJoinedRateLimiterLazy
      */
-    private SoundRateLimiter getParticipantJoinedRateLimiter()
-    {
-        if (this.participantJoinedRateLimiterLazy == null)
-        {
+    private SoundRateLimiter getParticipantJoinedRateLimiter() {
+        if (this.participantJoinedRateLimiterLazy == null) {
             this.participantJoinedRateLimiterLazy
-                = new SoundRateLimiter(PARTICIPANT_JOINED_RATE_TIMEOUT_MS);
+                    = new SoundRateLimiter(PARTICIPANT_JOINED_RATE_TIMEOUT_MS);
         }
 
         return this.participantJoinedRateLimiterLazy;
@@ -859,10 +835,8 @@ public class SoundNotificationManager
      *
      * @return recordingOnRateLimiterLazy
      */
-    private SoundRateLimiter getRecordingOnRateLimiter()
-    {
-        if (this.recordingOnRateLimiterLazy == null)
-        {
+    private SoundRateLimiter getRecordingOnRateLimiter() {
+        if (this.recordingOnRateLimiterLazy == null) {
             this.recordingOnRateLimiterLazy = new SoundRateLimiter(RECORDING_ON_RATE_TIMEOUT_MS);
         }
 
@@ -871,24 +845,29 @@ public class SoundNotificationManager
 
     /**
      * Extracts MediaStream from call.
+     *
      * @param call the call.
      * @return null or <tt>MediaStream</tt> if available.
      */
-    static MediaStream getMediaStream(Call call)
-    {
+    public static MediaStream getMediaStream(Call call) {
         CallPeer peer;
         if (call != null
-            && call.getCallPeers() != null
-            && call.getCallPeers().hasNext()
-            && (peer = call.getCallPeers().next()) != null
-            && peer instanceof MediaAwareCallPeer)
-        {
+                && call.getCallPeers() != null
+                && call.getCallPeers().hasNext()
+                && (peer = call.getCallPeers().next()) != null
+                && peer instanceof MediaAwareCallPeer) {
             MediaAwareCallPeer peerMedia = (MediaAwareCallPeer) peer;
 
             CallPeerMediaHandler mediaHandler
-                = peerMedia.getMediaHandler();
-            if (mediaHandler != null)
-            {
+                    = peerMedia.getMediaHandler();
+            if (mediaHandler != null) {
+//        if (stream == null
+//                || !call.getProtocolProvider().getAccountID().getAccountPropertyBoolean(
+//                ProtocolProviderFactory.USE_TRANSLATOR_IN_CONFERENCE, false)
+//                || stream.getDynamicRTPPayloadType(Constants.OPUS) == -1
+//                || fileName == null) {
+//            return;
+//        }
                 return mediaHandler.getStream(MediaType.AUDIO);
             }
         }

@@ -35,6 +35,7 @@ import org.jitsi.jigasi.sip.SipInfoJsonProtocol;
 import org.jitsi.jigasi.sounds.SoundNotificationManager;
 import org.jitsi.jigasi.stats.Statistics;
 import org.jitsi.jigasi.stats.StatsHandler;
+import org.jitsi.jigasi.text2speech.Text2Speech;
 import org.jitsi.jigasi.util.Util;
 import org.jitsi.service.neomedia.MediaStream;
 import org.jitsi.service.neomedia.format.MediaFormat;
@@ -1288,22 +1289,24 @@ public class SipGatewaySession
                 logger.info(SipGatewaySession.this.callContext + " SIP call format used: "
                         + Util.getFirstPeerMediaFormat(call));
 
-//                final MediaStream mediaStream = SoundNotificationManager.getMediaStream(call);
-//                final Map<Byte, MediaFormat> dynamicRTPPayloadTypes = mediaStream.getDynamicRTPPayloadTypes();
-//                dynamicRTPPayloadTypes.entrySet().forEach(entry -> {
-//                    System.out.println(entry.getValue().getMediaType().toString());
-//                });
+                final MediaStream mediaStream = SoundNotificationManager.getMediaStream(call);
 
                 Executors.newFixedThreadPool(1)
                         .submit(() -> {
-                            for ( ;; ) {
-                                soundNotificationManager.notifyLobbyAccessGranted();
+                            for (; ; ) {
+                                //soundNotificationManager.notifyLobbyAccessGranted();
+                                try {
+                                    SoundNotificationManager.injectSoundFileInStreamAsMULAW(mediaStream);
+                                } catch (Throwable throwable) {
+                                    System.out.println("DI UN ERROR LOCO");
+                                    throwable.printStackTrace();
+                                }
+
                                 System.out.println("ENVIO SONIDO START");
 
                                 try {
                                     Thread.sleep(2000);
-                                }
-                                catch (InterruptedException e) {
+                                } catch (InterruptedException e) {
                                 }
                             }
                         });

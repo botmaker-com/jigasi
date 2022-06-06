@@ -45,7 +45,7 @@ public class Text2Speech {
             return audioContents.substring(88).toByteArray();
 
         } catch (IOException ioE) {
-            throw new RuntimeException("Unable to connect to GCP Text To Speech Service");
+            throw new RuntimeException("Unable to connect to GCP Text To Speech Service", ioE);
         }
 
     }

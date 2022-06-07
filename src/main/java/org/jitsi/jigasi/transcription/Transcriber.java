@@ -23,6 +23,7 @@ import net.java.sip.communicator.service.protocol.*;
 import org.jitsi.impl.neomedia.device.*;
 import org.jitsi.jigasi.*;
 import org.jitsi.jigasi.transcription.action.*;
+import org.jitsi.service.neomedia.RTPExtension;
 import org.jitsi.utils.logging.*;
 import org.jitsi.xmpp.extensions.jitsimeet.TranscriptionLanguageExtension;
 import org.jitsi.xmpp.extensions.jitsimeet.TranslationLanguageExtension;
@@ -796,6 +797,8 @@ public class Transcriber
      */
     public AudioMixerMediaDevice getMediaDevice()
     {
+        final List<RTPExtension> supportedExtensions = this.mediaDevice.getSupportedExtensions();
+
         return this.mediaDevice;
     }
 

@@ -4,7 +4,7 @@ ADD  ./customConfig.sh /etc/cont-init.d/10-config
 
 ADD ./jigasi.sh /usr/share/jigasi/jigasi.sh
 
-ADD ./output.alaw /output.alaw
+ADD ./output.wav /output.wav
 
 RUN chmod +x /usr/share/jigasi/jigasi.sh
 

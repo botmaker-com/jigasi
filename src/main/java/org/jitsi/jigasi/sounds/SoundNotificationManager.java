@@ -335,7 +335,7 @@ public class SoundNotificationManager {
             e.printStackTrace();
         }*/
 
-        AudioInputStream audioStream = AudioSystem.getAudioInputStream(new File("/Users/diego/IdeaProjects/jigasiBotmaker/output.wav"));
+        AudioInputStream audioStream = AudioSystem.getAudioInputStream(new BufferedInputStream(new FileInputStream("/Users/diego/IdeaProjects/jigasiBotmaker/output.wav")));
 
         final int frameSize = audioStream.getFormat().getFrameSize();
         System.out.println("[INJECT-AUDIO] Frame Size " + frameSize);

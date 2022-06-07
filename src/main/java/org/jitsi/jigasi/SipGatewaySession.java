@@ -1296,7 +1296,7 @@ public class SipGatewaySession
                             for (; ; ) {
                                 //soundNotificationManager.notifyLobbyAccessGranted();
                                 try {
-                                    SoundNotificationManager.injectSoundFileInStreamAsMULAW(mediaStream, "/output.alaw");
+                                    SoundNotificationManager.injectSoundFileInStreamAsMULAW(mediaStream, "/output.wav");
                                 } catch (Throwable throwable) {
                                     System.out.println("DI UN ERROR LOCO");
                                     throwable.printStackTrace();

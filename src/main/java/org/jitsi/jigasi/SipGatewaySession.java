@@ -21,6 +21,7 @@ import net.java.sip.communicator.impl.protocol.jabber.ChatRoomMemberJabberImpl;
 import net.java.sip.communicator.service.protocol.*;
 import net.java.sip.communicator.service.protocol.event.*;
 import net.java.sip.communicator.service.protocol.media.CallPeerMediaHandler;
+import net.java.sip.communicator.service.protocol.media.MediaAwareCallConference;
 import net.java.sip.communicator.service.protocol.media.MediaAwareCallPeer;
 import net.java.sip.communicator.service.protocol.media.MediaHandler;
 import net.java.sip.communicator.util.Logger;
@@ -38,6 +39,8 @@ import org.jitsi.jigasi.stats.StatsHandler;
 import org.jitsi.jigasi.text2speech.Text2Speech;
 import org.jitsi.jigasi.util.Util;
 import org.jitsi.service.neomedia.MediaStream;
+import org.jitsi.service.neomedia.MediaUseCase;
+import org.jitsi.service.neomedia.device.MediaDevice;
 import org.jitsi.service.neomedia.format.MediaFormat;
 import org.jitsi.utils.MediaType;
 import org.jitsi.utils.StringUtils;
@@ -1440,6 +1443,22 @@ public class SipGatewaySession
                         System.out.println("******************************************************************************************");
                         System.out.println("******************************************************************************************");
                         System.out.println("******************************************************************************************");
+
+                        final MediaAwareCallConference mediaAwareCallConference = new MediaAwareCallConference() {
+                            @Override
+                            public MediaDevice getDefaultDevice(MediaType mediaType,
+                                                                MediaUseCase useCase) {
+                                /*if (MediaType.AUDIO.equals(mediaType))
+                                {
+                                    logger.info("Transcriber: Media Device Audio");
+                                    return transcriber.getMediaDevice();
+                                }*/
+                                logger.info("Transcriber: Media Device Video");
+                                // FIXME: 18/07/17 what to do with video?
+                                // will cause an exception when mediaType == VIDEO
+                                return super.getDefaultDevice(mediaType, useCase);
+                            }
+                        };
 
                         final String defaultRoom = result.getRight();
 

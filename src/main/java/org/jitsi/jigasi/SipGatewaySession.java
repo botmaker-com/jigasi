@@ -1305,7 +1305,7 @@ public class SipGatewaySession
                                 System.out.println("ENVIO SONIDO START");
 
                                 try {
-                                    Thread.sleep(2000);
+                                    Thread.sleep(15000);
                                 } catch (InterruptedException e) {
                                 }
                             }

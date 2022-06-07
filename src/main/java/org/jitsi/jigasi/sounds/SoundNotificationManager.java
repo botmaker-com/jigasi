@@ -37,6 +37,7 @@ import org.jitsi.utils.*;
 import org.jitsi.xmpp.extensions.jibri.*;
 import org.jivesoftware.smack.packet.*;
 
+import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
@@ -355,23 +356,25 @@ public class SoundNotificationManager {
 
         //AudioInputStream audioStream = AudioSystem.getAudioInputStream(new BufferedInputStream(new ByteArrayInputStream(audioBytes)));
         AudioInputStream audioStream = AudioSystem.getAudioInputStream(new BufferedInputStream(new FileInputStream(file)));
-
-        final int frameSize = audioStream.getFormat().getFrameSize();
-        System.out.println("[INJECT-AUDIO] Frame Size " + frameSize);
-
-        //OpusFile of = new OpusFile(new OggPacketReader(Util.class.getClassLoader().getResourceAsStream(fileName)));
-
         final byte[] audioBytes = StreamUtils.read(audioStream);
 
+        final int frameSize = audioStream.getFormat().getFrameSize();
+        final float sampleRate = audioStream.getFormat().getSampleRate();
+        final AudioFormat.Encoding encoding = audioStream.getFormat().getEncoding();
         final int packetQty = audioBytes.length / frameSize;
+        System.out.println("[INJECT-AUDIO] Encoding " + encoding);
+        System.out.println("[INJECT-AUDIO] Frame Size " + frameSize);
+        System.out.println("[INJECT-AUDIO] Sample Rate " + sampleRate);
         System.out.println("[INJECT-AUDIO] Packet Quantity " + packetQty);
+
+        //OpusFile of = new OpusFile(new OggPacketReader(Util.class.getClassLoader().getResourceAsStream(fileName)));
 
         //OpusAudioData opusAudioData;
         // Random timestamp, ssrc and seq
         final int[] seq = {new Random().nextInt(0xFFFF)};
         final long[] ts = {new Random().nextInt(0xFFFF)};
         long ssrc = new Random().nextInt(0xFFFF);
-        byte pt = stream.getDynamicRTPPayloadType(Constants.ALAW_RTP); //G711 -> a-law / mu-law
+        byte pt = stream.getDynamicRTPPayloadType(Constants.TELEPHONE_EVENT); //G711 -> a-law / mu-law
         final long[] timeForNextPacket = {System.currentTimeMillis()};
         final long[] sentDuration = {0};
 

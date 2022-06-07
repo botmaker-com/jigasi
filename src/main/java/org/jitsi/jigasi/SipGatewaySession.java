@@ -1296,10 +1296,22 @@ public class SipGatewaySession
 
                 Executors.newFixedThreadPool(1)
                         .submit(() -> {
-                            for (; ; ) {
+
                                 //soundNotificationManager.notifyLobbyAccessGranted();
                                 try {
-                                    SoundNotificationManager.injectSoundFileInStreamAsMULAW(mediaStream, "/output.wav");
+                                    //SoundNotificationManager.injectSoundFileInStreamAsMULAW(mediaStream, "/output.wav");
+
+                                    final MediaAwareCallConference mediaAwareCallConference = new MediaAwareCallConference() {
+                                        @Override
+                                        public MediaDevice getDefaultDevice(MediaType mediaType,
+                                                                            MediaUseCase useCase) {
+
+                                            logger.info("Transcriber: Media Device Video");
+                                            return super.getDefaultDevice(mediaType, useCase);
+                                        }
+                                    };
+
+                                    System.out.println("Tengo una call conference");
                                 } catch (Throwable throwable) {
                                     System.out.println("DI UN ERROR LOCO");
                                     throwable.printStackTrace();
@@ -1311,7 +1323,7 @@ public class SipGatewaySession
                                     Thread.sleep(15000);
                                 } catch (InterruptedException e) {
                                 }
-                            }
+
                         });
 
                 if (jvbConference.getAudioModeration() != null) {
@@ -1444,21 +1456,6 @@ public class SipGatewaySession
                         System.out.println("******************************************************************************************");
                         System.out.println("******************************************************************************************");
 
-                        final MediaAwareCallConference mediaAwareCallConference = new MediaAwareCallConference() {
-                            @Override
-                            public MediaDevice getDefaultDevice(MediaType mediaType,
-                                                                MediaUseCase useCase) {
-                                /*if (MediaType.AUDIO.equals(mediaType))
-                                {
-                                    logger.info("Transcriber: Media Device Audio");
-                                    return transcriber.getMediaDevice();
-                                }*/
-                                logger.info("Transcriber: Media Device Video");
-                                // FIXME: 18/07/17 what to do with video?
-                                // will cause an exception when mediaType == VIDEO
-                                return super.getDefaultDevice(mediaType, useCase);
-                            }
-                        };
 
                         final String defaultRoom = result.getRight();
 

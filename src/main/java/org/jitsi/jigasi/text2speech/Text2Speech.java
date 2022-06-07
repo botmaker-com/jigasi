@@ -42,7 +42,7 @@ public class Text2Speech {
             //    System.out.println("Audio content written to file \"output.mulaw\"");
             //}
 
-            return audioContents.substring(88).toByteArray();
+            return audioContents.toByteArray();
 
         } catch (IOException ioE) {
             throw new RuntimeException("Unable to connect to GCP Text To Speech Service", ioE);

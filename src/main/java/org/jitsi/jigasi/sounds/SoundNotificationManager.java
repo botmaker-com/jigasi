@@ -39,6 +39,7 @@ import org.jivesoftware.smack.packet.*;
 
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.util.*;
@@ -320,8 +321,9 @@ public class SoundNotificationManager {
         }
     }
 
-    public static void main(String[] args) {
-        final byte[] bytes = Text2Speech.textToSpeech("Hola! Soy Hernan");
+    public static void main(String[] args) throws IOException, UnsupportedAudioFileException {
+
+        /*final byte[] bytes = Text2Speech.textToSpeech("Hola! Soy Hernan");
 
         // Write the response to the output file.
         try (OutputStream out = new FileOutputStream("./output.alaw")) {
@@ -331,8 +333,19 @@ public class SoundNotificationManager {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
-        }
+        }*/
 
+        AudioInputStream audioStream = AudioSystem.getAudioInputStream(new File("/Users/diego/IdeaProjects/jigasiBotmaker/output.wav"));
+
+        final int frameSize = audioStream.getFormat().getFrameSize();
+        System.out.println("[INJECT-AUDIO] Frame Size " + frameSize);
+
+        //OpusFile of = new OpusFile(new OggPacketReader(Util.class.getClassLoader().getResourceAsStream(fileName)));
+
+        final byte[] audioBytes = StreamUtils.read(audioStream);
+
+        final int packetQty = audioBytes.length / frameSize;
+        System.out.println("[INJECT-AUDIO] Packet Quantity " + packetQty);
     }
 
     public static void injectSoundFileInStreamAsMULAW(MediaStream stream, String file)
@@ -341,8 +354,7 @@ public class SoundNotificationManager {
         //final byte[] audioBytes = Text2Speech.textToSpeech("Hola! Soy Diego");
 
         //AudioInputStream audioStream = AudioSystem.getAudioInputStream(new BufferedInputStream(new ByteArrayInputStream(audioBytes)));
-        AudioInputStream audioStream = AudioSystem.getAudioInputStream(new BufferedInputStream(
-                new FileInputStream(file)));
+        AudioInputStream audioStream = AudioSystem.getAudioInputStream(new BufferedInputStream(new FileInputStream(file)));
 
         final int frameSize = audioStream.getFormat().getFrameSize();
         System.out.println("[INJECT-AUDIO] Frame Size " + frameSize);

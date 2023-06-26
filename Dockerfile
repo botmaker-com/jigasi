@@ -1,4 +1,4 @@
-FROM jitsi/jigasi
+FROM jitsi/jigasi:stable-7648-1
 
 ADD  ./customConfig.sh /etc/cont-init.d/10-config
 

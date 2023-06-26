@@ -54,6 +54,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -641,7 +642,7 @@ public class SipGatewaySession
     }
 
     private Pair<String, String> getRoomUrlPath() {
-        final HttpPost method = new HttpPost("http://voice-gateway/rooms");
+        /*final HttpPost method = new HttpPost("http://voice-gateway/rooms");
         method.addHeader("auth-token", "6dnz2kK7fasdsadSVSXPn9QQekhgFVF");
 
         try (final CloseableHttpClient client = HttpClientBuilder.create().build()) {
@@ -666,7 +667,9 @@ public class SipGatewaySession
         } catch (final Exception e) {
             e.printStackTrace();
             return null;
-        }
+        }*/
+
+        return ImmutablePair.of("jigasi-room", "jigasi-room");
     }
 
     @Override
